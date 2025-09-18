@@ -1,20 +1,36 @@
-import React, { useState } from 'react';
-import { Sprout, User, Phone, MapPin, Map, Layers, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import React, { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Sprout, User, Phone, MapPin, Map, Layers, Mail, Lock, Eye, EyeOff, X } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import {AppContext} from '../context/appcontext';
 
 const Login: React.FC = () => {
+  const context = useContext(AppContext);
+  
+    if (!context) {
+      throw new Error("AppContext must be used within AppContextProvider");
+    }
+  const {setName,setToken,setEmail,setDistrict,setMobilenumber,setSoiltype,setState}=context;
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    
     email: '',
     password: '',
-    mobile: '',
+    name: '',
+    mobilenumber: '',
     state: '',
     district: '',
-    soilType: ''
+    soiltype: ''
   });
+  //const { email, password, name, mobilenumber,state,district,soiltype} = req.body;
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // 🔹 Yahan apne backend ka URL daalo
+  const backendUrl = "http://localhost:4000";  
 
   const states = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -24,19 +40,20 @@ const Login: React.FC = () => {
     'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
   ];
 
-  const soilTypes = [
+  const soiltypes = [
     'Alluvial Soil', 'Black Soil (Regur)', 'Red Soil', 'Laterite Soil',
     'Desert Soil', 'Mountain Soil', 'Saline Soil', 'Peaty Soil'
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    
     const { name, value } = e.target;
+    console.log(e.target.value)
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -48,42 +65,74 @@ const Login: React.FC = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
+    if (!formData.name.trim() && !isLogin) {
       newErrors.name = 'Name is required';
     }
 
-    if (!formData.mobile.trim()) {
+    if (!formData.mobilenumber.trim() && !isLogin) {
       newErrors.mobile = 'Mobile number is required';
-    } else if (!/^[6-9]\d{9}$/.test(formData.mobile)) {
+    } else if (!isLogin && !/^[6-9]\d{9}$/.test(formData.mobilenumber)) {
       newErrors.mobile = 'Please enter a valid 10-digit mobile number';
     }
 
-    if (!formData.state) {
+    if (!formData.state && !isLogin) {
       newErrors.state = 'Please select your state';
     }
 
-    if (!formData.district.trim()) {
+    if (!formData.district.trim() && !isLogin) {
       newErrors.district = 'District is required';
     }
 
-    if (!formData.soilType) {
-      newErrors.soilType = 'Please select your soil type';
+    if (!formData.soiltype && !isLogin) {
+      newErrors.soiltype = 'Please select your soil type';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submit clicked ✅", formData);
     
     if (isLogin || validateForm()) {
-      // Here you would typically send the data to your backend
-      console.log(isLogin ? 'Login:' : 'Registration:', formData);
-      alert(isLogin ? 'Login successful!' : 'Registration successful! Welcome to CropAdvisor.');
-      
-      // Redirect to dashboard or handle login success
-      window.location.href = '/';
+      try {
+        let response;
+
+        if (isLogin) {
+          //  Login API call
+          response = await axios.post(backendUrl+'/api/user/login' ,{
+            email: formData.email,
+            password: formData.password
+          });
+        
+
+        } else {
+          // 🔹 Register API call
+          response = await axios.post(backendUrl+'/api/user/register', formData);
+           console.log("response of backend", response.data);
+        }
+
+        if (response.data.success) {
+          toast.success(isLogin ? "Login successful!" : "Registration successful!");
+           setToken(response.data.token)
+           setName(response.data.name)
+           setDistrict(response.data.district)
+           setEmail(response.data.email)
+           setMobilenumber(response.data.mobilenumber)
+           setState(response.data.state)
+           setSoiltype(response.data.soiltype)
+          // 🔹 Save token in localStorage
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("name", JSON.stringify(response.data.name));
+
+          navigate("/dashboard");
+        } else {
+          toast.error(response.data.message || "Something went wrong!");
+        }
+      } catch (err: any) {
+        toast.error(err.response?.data?.message || err.message);
+      }
     }
   };
 
@@ -99,6 +148,7 @@ const Login: React.FC = () => {
       </div>
       
       <div className="max-w-md w-full">
+        
         {/* Logo and Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-6">
@@ -117,8 +167,14 @@ const Login: React.FC = () => {
 
         {/* Login/Registration Form */}
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-200 transition z-10"
+        >
+          <X className="w-6 h-6 text-gray-600" />
+        </button>
           {/* Toggle Buttons */}
-          <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
+          <div className="flex bg-gray-100 rounded-lg p-1 mb-6 mt-6">
             <button
               type="button"
               onClick={() => setIsLogin(true)}
@@ -247,9 +303,9 @@ const Login: React.FC = () => {
                 </div>
                 <input
                   type="tel"
-                  id="mobile"
-                  name="mobile"
-                  value={formData.mobile}
+                  id="mobilenumber"
+                  name="mobilenumber"
+                  value={formData.mobilenumber}
                   onChange={handleInputChange}
                   className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
                     errors.mobile ? 'border-red-300' : 'border-gray-300'
@@ -316,7 +372,7 @@ const Login: React.FC = () => {
 
                 {/* Soil Type Field */}
                 <div>
-              <label htmlFor="soilType" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="soiltype" className="block text-sm font-medium text-gray-700 mb-2">
                 Soil Type
               </label>
               <div className="relative">
@@ -324,16 +380,16 @@ const Login: React.FC = () => {
                   <Layers className="h-5 w-5 text-gray-400" />
                 </div>
                 <select
-                  id="soilType"
-                  name="soilType"
-                  value={formData.soilType}
+                  id="soiltype"
+                  name="soiltype"
+                  value={formData.soiltype}
                   onChange={handleInputChange}
                   className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors appearance-none bg-white ${
                     errors.soilType ? 'border-red-300' : 'border-gray-300'
                   }`}
                 >
                   <option value="">Select your soil type</option>
-                  {soilTypes.map((soil) => (
+                  {soiltypes.map((soil) => (
                     <option key={soil} value={soil}>
                       {soil}
                     </option>
@@ -362,27 +418,6 @@ const Login: React.FC = () => {
               </button>
             </div>
           )}
-
-          {/* Social Login Options */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
-            
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors">
-                <span>Google</span>
-              </button>
-              <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors">
-                <span>Facebook</span>
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Features Preview */}

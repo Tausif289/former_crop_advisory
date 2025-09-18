@@ -4,6 +4,13 @@
   padding: 2rem;
   text-align: center;
 }
+/* Google Translate top banner ko hide kare */
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+body {
+  top: 0px !important;
+}
 
 .logo {
   height: 6em;

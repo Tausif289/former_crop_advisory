@@ -1,137 +1,36 @@
 import React, { useState } from 'react';
+import type { LucideIcon } from "lucide-react";
 import { ChevronDown, ChevronUp, Sprout, Droplets, Sun, Scissors } from 'lucide-react';
+import crops from '../assets/crops.ts';
+interface CropStep {
+  title: string;// ya React.FC<React.SVGProps<SVGSVGElement>>
+  //icon: LucideIcon,
+  description: string;
+  tips: string[];
+}
+
+interface Crop {
+  id: number;
+  name: string;
+  image: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  duration: string;
+  steps: CropStep[];
+}
 
 const CropFarmingGuide: React.FC = () => {
   const [expandedCards, setExpandedCards] = useState<number[]>([]);
+  const [search, setSearch] = useState("");
 
   const toggleCard = (id: number) => {
-    setExpandedCards(prev =>
-      prev.includes(id)
-        ? prev.filter(cardId => cardId !== id)
-        : [...prev, id]
+    setExpandedCards((prev) =>
+      prev.includes(id) ? prev.filter((cardId) => cardId !== id) : [...prev, id]
     );
   };
-
-  const crops = [
-    {
-      id: 1,
-      name: 'Tomatoes',
-      image: 'https://images.pexels.com/photos/1327838/pexels-photo-1327838.jpeg?auto=compress&cs=tinysrgb&w=400',
-      difficulty: 'Medium',
-      duration: '90-120 days',
-      steps: [
-        {
-          title: 'Seed Preparation',
-          icon: Sprout,
-          description: 'Start with high-quality seeds. Soak seeds in warm water for 24 hours before planting.',
-          tips: ['Use disease-free seeds', 'Maintain water temperature at 20-25°C']
-        },
-        {
-          title: 'Soil Preparation',
-          icon: Sun,
-          description: 'Prepare well-drained, fertile soil with pH 6.0-6.8. Add compost and organic matter.',
-          tips: ['Test soil pH regularly', 'Add 2-3 inches of compost', 'Ensure good drainage']
-        },
-        {
-          title: 'Planting',
-          icon: Sprout,
-          description: 'Plant seeds 1/4 inch deep, spacing 2-3 feet apart. Water gently after planting.',
-          tips: ['Plant after last frost', 'Use row covers if needed', 'Mark planting areas']
-        },
-        {
-          title: 'Watering & Care',
-          icon: Droplets,
-          description: 'Water deeply 1-2 times per week. Provide support stakes as plants grow.',
-          tips: ['Water at soil level', 'Mulch around plants', 'Prune suckers regularly']
-        },
-        {
-          title: 'Harvesting',
-          icon: Scissors,
-          description: 'Harvest when fruits are fully colored but still firm. Pick regularly for continued production.',
-          tips: ['Harvest in morning', 'Store at room temperature', 'Use within 5-7 days']
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Wheat',
-      image: 'https://images.pexels.com/photos/1595108/pexels-photo-1595108.jpeg?auto=compress&cs=tinysrgb&w=400',
-      difficulty: 'Easy',
-      duration: '120-150 days',
-      steps: [
-        {
-          title: 'Land Preparation',
-          icon: Sun,
-          description: 'Plow the field to 20-25 cm depth. Break clods and level the field properly.',
-          tips: ['Deep plowing recommended', 'Remove weeds and debris', 'Level field for uniform irrigation']
-        },
-        {
-          title: 'Sowing',
-          icon: Sprout,
-          description: 'Sow seeds at 2-5 cm depth with row spacing of 18-23 cm. Use seed rate of 100-125 kg/ha.',
-          tips: ['Sow after first rain', 'Use treated seeds', 'Maintain proper row spacing']
-        },
-        {
-          title: 'Irrigation',
-          icon: Droplets,
-          description: 'Apply irrigation at crown root initiation, tillering, jointing, flowering, and grain filling stages.',
-          tips: ['Avoid overwatering', 'Time irrigation properly', 'Check soil moisture regularly']
-        },
-        {
-          title: 'Fertilization',
-          icon: Sprout,
-          description: 'Apply nitrogen, phosphorus, and potassium as per soil test recommendations.',
-          tips: ['Split nitrogen application', 'Apply phosphorus at sowing', 'Use organic fertilizers']
-        },
-        {
-          title: 'Harvesting',
-          icon: Scissors,
-          description: 'Harvest when grains are hard and moisture content is 20-25%. Use combine harvester for efficiency.',
-          tips: ['Harvest at right moisture', 'Store properly to prevent spoilage', 'Clean grains before storage']
-        }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Rice',
-      image: 'https://images.pexels.com/photos/2324837/pexels-photo-2324837.jpeg?auto=compress&cs=tinysrgb&w=400',
-      difficulty: 'Medium',
-      duration: '110-140 days',
-      steps: [
-        {
-          title: 'Nursery Preparation',
-          icon: Sprout,
-          description: 'Prepare nursery beds with fine, well-leveled soil. Soak seeds for 24 hours before sowing.',
-          tips: ['Select certified seeds', 'Maintain nursery bed moisture', 'Protect from birds and pests']
-        },
-        {
-          title: 'Field Preparation',
-          icon: Sun,
-          description: 'Plow and puddle the field with 5-10 cm standing water. Level the field properly.',
-          tips: ['Maintain water level', 'Remove weeds completely', 'Create proper bunds']
-        },
-        {
-          title: 'Transplanting',
-          icon: Sprout,
-          description: 'Transplant 25-30 day old seedlings with 20x20 cm spacing. Plant 2-3 seedlings per hill.',
-          tips: ['Handle seedlings carefully', 'Transplant in morning or evening', 'Maintain shallow water depth']
-        },
-        {
-          title: 'Water Management',
-          icon: Droplets,
-          description: 'Maintain 2-5 cm water depth throughout growing season. Drain before harvesting.',
-          tips: ['Check water level daily', 'Ensure good quality water', 'Manage water during flowering']
-        },
-        {
-          title: 'Harvesting',
-          icon: Scissors,
-          description: 'Harvest when 80% of grains turn golden yellow. Cut close to ground level.',
-          tips: ['Time harvesting correctly', 'Dry grains properly', 'Store in moisture-proof containers']
-        }
-      ]
-    }
-  ];
-
+   const filteredCrops = crops.filter(crop =>
+    crop.name.toLowerCase().includes(search.toLowerCase())
+  );
+ 
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -149,11 +48,21 @@ const CropFarmingGuide: React.FC = () => {
             </p>
           </div>
         </div>
+          {/* 🔍 Search Bar */}
+        <div className="mt-4">
+          <input
+            type="text"
+            placeholder="Search crops..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+          />
+      </div>
         
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
           <div className="text-center">
-            <div className="text-lg font-bold text-green-600">50+</div>
+            <div className="text-lg font-bold text-green-600">100+</div>
             <p className="text-xs text-gray-600">Crop Guides</p>
           </div>
           <div className="text-center">
@@ -169,7 +78,8 @@ const CropFarmingGuide: React.FC = () => {
 
       {/* Crop Guide Cards */}
       <div className="space-y-6">
-        {crops.map((crop) => (
+        {
+        filteredCrops.map((crop) => (
           <div key={crop.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
             {/* Card Header */}
             <div className="p-6 border-b border-gray-100">
@@ -238,7 +148,8 @@ const CropFarmingGuide: React.FC = () => {
                     <div key={stepIndex} className="flex space-x-4">
                       <div className="flex-shrink-0">
                         <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
-                          <step.icon className="w-5 h-5" />
+                          {/* <step.icon className="w-5 h-5" /> */}
+                          <h1>#</h1>
                         </div>
                       </div>
                       <div className="flex-1">

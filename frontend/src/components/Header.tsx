@@ -3,10 +3,10 @@ import { useLocation } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const location = useLocation();
-  
+
   const getPageTitle = () => {
     switch (location.pathname) {
-      case '/':
+      case '/dashboard':
         return 'Dashboard';
       case '/crop-recommendation':
         return 'Crop Recommendation';
@@ -17,13 +17,18 @@ const Header: React.FC = () => {
       case '/weather-forecast':
         return 'Weather Forecast';
       default:
-        return 'Dashboard';
+        return null;
     }
   };
 
+  const title = getPageTitle();
+
+  // 🔹 Render nothing if no title
+  if (!title) return null;
+
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <h1 className="text-2xl font-bold text-gray-800">{getPageTitle()}</h1>
+      <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
     </header>
   );
 };
