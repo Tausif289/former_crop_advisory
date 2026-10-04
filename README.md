@@ -407,7 +407,7 @@ Distributed under the **MIT License**. See `LICENSE` for details.
 
 **Your Name**
 - GitHub: [Github](https://github.com/Tausif289)
-- LinkedIn: [Linkdin]((https://lnkd.in/p/gWY5-tUh))
+- LinkedIn: [Linkdin](https://lnkd.in/p/gWY5-tUh)
 
 ---
 
