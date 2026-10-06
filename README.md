@@ -405,7 +405,7 @@ Distributed under the **MIT License**. See `LICENSE` for details.
 
 ## 👤 Author
 
-**Your Name**
+**Tausif**
 - GitHub: [Github](https://github.com/Tausif289)
 - LinkedIn: [Linkdin](https://lnkd.in/p/gWY5-tUh)
 
